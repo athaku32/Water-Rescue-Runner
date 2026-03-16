@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Rescue Runner | charity: water</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* ===== CSS VARIABLES & RESET ===== */
+        :root {
+            --cw-yellow: #F5C916;
+            --cw-yellow-dark: #D4AB00;
+            --cw-black: #1A1A1A;
+            --cw-white: #FFFFFF;
+            --cw-blue-clean: #4FC3F7;
+            --cw-blue-deep: #0288D1;
+            --cw-brown-dirty: #8D6E63;
+            --cw-brown-dark: #5D4037;
+            --cw-red-penalty: #EF5350;
+            --cw-green-success: #66BB6A;
+            --cw-bg-gradient: linear-gradient(180deg, #E3F2FD 0%, #BBDEFB 40%, #90CAF9 100%);
+            --font-display: 'Montserrat', sans-serif;
+            --font-body: 'Open Sans', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--cw-black);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        /* ===== GAME CONTAINER ===== */
+        #game-wrapper {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ===== HEADER / HUD ===== */
+        #game-header {
+            background: var(--cw-yellow);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            flex-shrink: 0;
+        }
+
+        #game-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #game-header .brand .logo-text {
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: 1.1rem;
+            color: var(--cw-black);
+            letter-spacing: -0.5px;
+        }
+
+        #game-header .brand .logo-text span {
+            color: var(--cw-blue-deep);
+        }
+
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--cw-black);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .hud {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .hud-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hud-label {
+            font-family: var(--font-display);
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(26,26,26,0.6);
+        }
+
+        .hud-value {
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: var(--cw-black);
+            line-height: 1;
+        }
+
+        #score-display {
+            color: var(--cw-blue-deep);
+        }
+
+        #timer-display {
+            color: var(--cw-black);
+        }
+
+        .timer-warning {
+            color: var(--cw-red-penalty) !important;
+            animation: pulse 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.15); }
+        }
+
+        /* ===== GAME AREA ===== */
+        #game-area {
+            flex: 1;
+            background: var(--cw-bg-gradient);
+            position: relative;
+            overflow: hidden;
+            cursor: none;
+        }
+
+        /* Cloud decorations */
+        .cloud {
+            position: absolute;
+            background: rgba(255,255,255,0.7);
+            border-radius: 50px;
+            top: 8%;
+            animation: cloudFloat 20s linear infinite;
+        }
+
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: rgba(255,255,255,0.7);
+            border-radius: 50%;
+        }
+
+        .cloud-1 {
+            width: 100px;
+            height: 35px;
+            left: 10%;
+            animation-duration: 25s;
+        }
+        .cloud-1::before {
+            width: 50px; height: 40px;
+            top: -20px; left: 15px;
+        }
+        .cloud-1::after {
+            width: 35px; height: 30px;
+            top: -12px; left: 50px;
+        }
+
+        .cloud-2 {
+            width: 80px;
+            height: 28px;
+            left: 55%;
+            top: 5%;
+            animation-duration: 30s;
+            animation-delay: -10s;
+        }
+        .cloud-2::before {
+            width: 40px; height: 32px;
+            top: -16px; left: 12px;
+        }
+        .cloud-2::after {
+            width: 30px; height: 25px;
+            top: -10px; left: 40px;
+        }
+
+        .cloud-3 {
+            width: 120px;
+            height: 38px;
+            left: 75%;
+            top: 12%;
+            animation-duration: 35s;
+            animation-delay: -5s;
+        }
+        .cloud-3::before {
+            width: 55px; height: 44px;
+            top: -22px; left: 20px;
+        }
+        .cloud-3::after {
+            width: 40px; height: 34px;
+            top: -14px; left: 60px;
+        }
+
+        @keyframes cloudFloat {
+            from { transform: translateX(-150px); }
+            to { transform: translateX(calc(100vw + 150px)); }
+        }
+
+        /* ===== WATER DROPS ===== */
+        .drop {
+            position: absolute;
+            width: 40px;
+            height: 50px;
+            pointer-events: none;
+            z-index: 10;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+            transition: none;
+        }
+
+        .drop-clean {
+            animation: dropShimmer 1.5s ease-in-out infinite alternate;
+        }
+
+        .drop-dirty {
+            animation: dropWobble 0.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes dropShimmer {
+            from { filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15)) brightness(1); }
+            to { filter: drop-shadow(0 4px 8px rgba(79,195,247,0.4)) brightness(1.1); }
+        }
+
+        @keyframes dropWobble {
+            from { transform: rotate(-3deg); }
+            to { transform: rotate(3deg); }
+        }
+
+        /* ===== BUCKET / PLAYER ===== */
+        #player {
+            position: absolute;
+            bottom: 20px;
+            width: 70px;
+            height: 60px;
+            z-index: 50;
+            transition: left 0.05s linear;
+        }
+
+        /* ===== FEEDBACK MESSAGES ===== */
+        .feedback {
+            position: absolute;
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: 1.4rem;
+            pointer-events: none;
+            z-index: 80;
+            animation: feedbackFloat 0.8s ease-out forwards;
+        }
+
+        .feedback-good {
+            color: var(--cw-green-success);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .feedback-bad {
+            color: var(--cw-red-penalty);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        @keyframes feedbackFloat {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
+        }
+
+        /* ===== GROUND ===== */
+        #ground {
+            height: 15px;
+            background: linear-gradient(to bottom, #A5D6A7, #81C784);
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            z-index: 5;
+        }
+
+        /* ===== SCREENS (Start, Win, Lose) ===== */
+        .screen-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            backdrop-filter: blur(4px);
+        }
+
+        .screen-overlay.hidden {
+            display: none;
+        }
+
+        .screen-box {
+            background: var(--cw-white);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: screenPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes screenPop {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .screen-box h2 {
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: var(--cw-black);
+        }
+
+        .screen-box .subtitle {
+            font-family: var(--font-body);
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .screen-box .final-score {
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: 3rem;
+            color: var(--cw-blue-deep);
+            margin: 10px 0;
+        }
+
+        .btn {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 14px 36px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: var(--cw-yellow);
+            color: var(--cw-black);
+            box-shadow: 0 4px 15px rgba(245,201,22,0.4);
+        }
+
+        .btn-primary:hover {
+            background: var(--cw-yellow-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245,201,22,0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-reset {
+            background: transparent;
+            color: var(--cw-black);
+            border: 2px solid var(--cw-black);
+            font-size: 0.85rem;
+            padding: 10px 24px;
+            margin-top: 10px;
+        }
+
+        .btn-reset:hover {
+            background: var(--cw-black);
+            color: var(--cw-white);
+        }
+
+        /* ===== IN-GAME RESET BUTTON ===== */
+        #reset-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 150;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.75rem;
+            padding: 8px 18px;
+            border: 2px solid rgba(255,255,255,0.7);
+            border-radius: 50px;
+            background: rgba(255,255,255,0.2);
+            color: var(--cw-white);
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            backdrop-filter: blur(4px);
+            transition: all 0.2s;
+        }
+
+        #reset-btn:hover {
+            background: rgba(255,255,255,0.4);
+            border-color: var(--cw-white);
+        }
+
+        /* ===== MESSAGE BAR ===== */
+        #message-bar {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--cw-white);
+            background: rgba(0,0,0,0.5);
+            padding: 8px 24px;
+            border-radius: 50px;
+            z-index: 90;
+            opacity: 0;
+            transition: opacity 0.3s;
+            backdrop-filter: blur(4px);
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        #message-bar.show {
+            opacity: 1;
+        }
+
+        /* ===== CONFETTI ===== */
+        .confetti-piece {
+            position: absolute;
+            z-index: 300;
+            pointer-events: none;
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        #progress-wrap {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            max-width: 300px;
+            height: 8px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 10px;
+            z-index: 90;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--cw-blue-clean), var(--cw-blue-deep));
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        #progress-label {
+            position: absolute;
+            top: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--font-display);
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: rgba(0,0,0,0.4);
+            z-index: 90;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ===== MOBILE CONTROLS ===== */
+        #mobile-controls {
+            display: none;
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            gap: 20px;
+            z-index: 150;
+        }
+
+        .mobile-btn {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            border: 2px solid rgba(255,255,255,0.6);
+            color: var(--cw-white);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .mobile-btn:active {
+            background: rgba(255,255,255,0.5);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            #game-header {
+                padding: 8px 14px;
+            }
+
+            .hud {
+                gap: 12px;
+            }
+
+            .hud-value {
+                font-size: 1.2rem;
+            }
+
+            .hud-label {
+                font-size: 0.55rem;
+            }
+
+            #game-header .brand .logo-text {
+                font-size: 0.9rem;
+            }
+
+            .brand-icon {
+                width: 26px;
+                height: 26px;
+                font-size: 14px;
+            }
+
+            .drop {
+                width: 32px;
+                height: 42px;
+            }
+
+            #player {
+                width: 58px;
+                height: 50px;
+                bottom: 90px;
+            }
+
+            #mobile-controls {
+                display: flex;
+            }
+
+            #reset-btn {
+                bottom: auto;
+                top: 55px;
+                right: 10px;
+                font-size: 0.65rem;
+                padding: 6px 12px;
+            }
+
+            #progress-wrap {
+                width: 50%;
+            }
+
+            #ground {
+                height: 80px;
+                background: linear-gradient(to bottom, #A5D6A7 0%, #81C784 20%, #66BB6A 100%);
+            }
+
+            .screen-box {
+                padding: 28px;
+            }
+
+            .screen-box h2 {
+                font-size: 1.5rem;
+            }
+
+            .screen-box .final-score {
+                font-size: 2.4rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .hud {
+                gap: 8px;
+            }
+            .hud-value {
+                font-size: 1rem;
+            }
+            #game-header .brand .logo-text {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-wrapper">
+        <!-- HEADER / HUD -->
+        <div id="game-header">
+            <div class="brand">
+                <div class="brand-icon">💧</div>
+                <div class="logo-text">charity: <span>water</span></div>
+            </div>
+            <div class="hud">
+                <div class="hud-item">
+                    <span class="hud-label">Score</span>
+                    <span class="hud-value" id="score-display">0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Goal</span>
+                    <span class="hud-value" style="font-size:1rem; color:#666;">100</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Time</span>
+                    <span class="hud-value" id="timer-display">60</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAME AREA -->
+        <div id="game-area">
+            <!-- Clouds -->
+            <div class="cloud cloud-1"></div>
+            <div class="cloud cloud-2"></div>
+            <div class="cloud cloud-3"></div>
+
+            <!-- Progress bar -->
+            <div id="progress-wrap">
+                <div id="progress-bar"></div>
+            </div>
+            <div id="progress-label">0 / 100 drops collected</div>
+
+            <!-- Message bar -->
+            <div id="message-bar"></div>
+
+            <!-- Player bucket -->
+            <div id="player">
+                <svg viewBox="0 0 70 60" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Bucket body -->
+                    <path d="M10 15 L5 55 Q5 60 10 60 L60 60 Q65 60 65 55 L60 15 Z" fill="#F5C916" stroke="#D4AB00" stroke-width="2"/>
+                    <!-- Bucket rim -->
+                    <rect x="6" y="12" width="58" height="8" rx="3" fill="#D4AB00"/>
+                    <!-- Handle -->
+                    <path d="M20 12 Q35 -5 50 12" fill="none" stroke="#888" stroke-width="3" stroke-linecap="round"/>
+                    <!-- Water inside -->
+                    <path d="M12 30 Q35 25 58 30 L56 55 Q55 58 52 58 L18 58 Q15 58 14 55 Z" fill="#4FC3F7" opacity="0.6"/>
+                    <!-- Shine -->
+                    <path d="M18 20 L15 45" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </div>
+
+            <!-- Ground -->
+            <div id="ground"></div>
+
+            <!-- Reset button -->
+            <button id="reset-btn" onclick="resetGame()">↺ Reset</button>
+
+            <!-- Mobile controls -->
+            <div id="mobile-controls">
+                <div class="mobile-btn" id="btn-left" ontouchstart="startMobileMove('left')" ontouchend="stopMobileMove()" onmousedown="startMobileMove('left')" onmouseup="stopMobileMove()">◀</div>
+                <div class="mobile-btn" id="btn-right" ontouchstart="startMobileMove('right')" ontouchend="stopMobileMove()" onmousedown="startMobileMove('right')" onmouseup="stopMobileMove()">▶</div>
+            </div>
+        </div>
+
+        <!-- START SCREEN -->
+        <div class="screen-overlay" id="start-screen">
+            <div class="screen-box">
+                <div style="font-size: 3rem; margin-bottom: 10px;">💧</div>
+                <h2>Water Rescue Runner</h2>
+                <p class="subtitle">Catch clean water drops to help communities get safe drinking water! Avoid the dirty drops — they'll cost you points.<br><br>🎯 Collect <strong>100 points</strong> in <strong>60 seconds</strong> to win!</p>
+                <p style="font-size:0.8rem; color:#999; margin-bottom:20px;">Use ← → arrow keys or tap buttons on mobile</p>
+                <button class="btn btn-primary" onclick="startGame()">Start Game</button>
+            </div>
+        </div>
+
+        <!-- WIN SCREEN -->
+        <div class="screen-overlay hidden" id="win-screen">
+            <div class="screen-box">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+                <h2>Village Saved!</h2>
+                <p class="subtitle">You collected enough clean water to help a community! Every drop makes a difference.</p>
+                <div class="final-score" id="win-score">0</div>
+                <p style="font-size:0.8rem; color:#999; margin-bottom:20px;">points collected</p>
+                <button class="btn btn-primary" onclick="resetGame()">Play Again</button>
+            </div>
+        </div>
+
+        <!-- LOSE SCREEN -->
+        <div class="screen-overlay hidden" id="lose-screen">
+            <div class="screen-box">
+                <div style="font-size: 3rem; margin-bottom: 10px;">⏱️</div>
+                <h2>Time's Up!</h2>
+                <p class="subtitle">You didn't collect enough clean water this time. But don't give up — every attempt counts!</p>
+                <div class="final-score" id="lose-score" style="color: var(--cw-red-penalty);">0</div>
+                <p style="font-size:0.8rem; color:#999; margin-bottom:20px;">points collected</p>
+                <button class="btn btn-primary" onclick="resetGame()">Try Again</button>
+                <br>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== GAME STATE =====
+        let score = 0;
+        let timeLeft = 60;
+        let gameRunning = false;
+        let gameLoop = null;
+        let timerInterval = null;
+        let dropInterval = null;
+        let drops = [];
+        let playerX = 0;
+        let keysDown = {};
+        let mobileDirection = null;
+        let mobileInterval = null;
+        const GOAL_SCORE = 100;
+        const GAME_TIME = 60;
+        const PLAYER_SPEED = 7;
+
+        // ===== DOM ELEMENTS =====
+        const gameArea = document.getElementById('game-area');
+        const player = document.getElementById('player');
+        const scoreDisplay = document.getElementById('score-display');
+        const timerDisplay = document.getElementById('timer-display');
+        const progressBar = document.getElementById('progress-bar');
+        const progressLabel = document.getElementById('progress-label');
+        const messageBar = document.getElementById('message-bar');
+        const startScreen = document.getElementById('start-screen');
+        const winScreen = document.getElementById('win-screen');
+        const loseScreen = document.getElementById('lose-screen');
+
+        // ===== INITIALIZE PLAYER POSITION =====
+        function initPlayer() {
+            const areaWidth = gameArea.offsetWidth;
+            playerX = (areaWidth / 2) - 35;
+            player.style.left = playerX + 'px';
+        }
+
+        // ===== CREATE A DROP =====
+        function createDrop() {
+            if (!gameRunning) return;
+
+            const areaWidth = gameArea.offsetWidth;
+            const isClean = Math.random() > 0.3; // 70% clean, 30% dirty
+            const drop = document.createElement('div');
+            drop.classList.add('drop');
+            drop.classList.add(isClean ? 'drop-clean' : 'drop-dirty');
+            drop.dataset.type = isClean ? 'clean' : 'dirty';
+
+            // Random horizontal position
+            const x = Math.random() * (areaWidth - 40);
+            drop.style.left = x + 'px';
+            drop.style.top = '-60px';
+
+            // SVG drop shape
+            if (isClean) {
+                drop.innerHTML = `
+                    <svg viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 2 Q20 2 35 30 Q40 42 20 48 Q0 42 5 30 Z" fill="#4FC3F7" stroke="#0288D1" stroke-width="1.5"/>
+                        <path d="M14 18 Q16 12 20 10" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round"/>
+                        <ellipse cx="15" cy="22" rx="3" ry="4" fill="rgba(255,255,255,0.3)"/>
+                    </svg>`;
+            } else {
+                drop.innerHTML = `
+                    <svg viewBox="0 0 40 50" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 2 Q20 2 35 30 Q40 42 20 48 Q0 42 5 30 Z" fill="#8D6E63" stroke="#5D4037" stroke-width="1.5"/>
+                        <path d="M14 18 Q16 12 20 10" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round"/>
+                        <text x="20" y="35" text-anchor="middle" fill="#5D4037" font-size="14" font-weight="bold">☠</text>
+                    </svg>`;
+            }
+
+            gameArea.appendChild(drop);
+
+            // Drop speed (randomized a little)
+            const speed = 2 + Math.random() * 2.5;
+            drops.push({ element: drop, x: x, y: -60, speed: speed, type: drop.dataset.type });
+        }
+
+        // ===== UPDATE DROPS =====
+        function updateDrops() {
+            const playerRect = player.getBoundingClientRect();
+            const areaHeight = gameArea.offsetHeight;
+            const isMobile = window.innerWidth <= 600;
+            const groundHeight = isMobile ? 80 : 15;
+
+            for (let i = drops.length - 1; i >= 0; i--) {
+                const drop = drops[i];
+                drop.y += drop.speed;
+                drop.element.style.top = drop.y + 'px';
+
+                // Collision detection
+                const dropRect = drop.element.getBoundingClientRect();
+                if (
+                    dropRect.left < playerRect.right - 5 &&
+                    dropRect.right > playerRect.left + 5 &&
+                    dropRect.bottom > playerRect.top &&
+                    dropRect.top < playerRect.bottom
+                ) {
+                    // Caught!
+                    if (drop.type === 'clean') {
+                        score += 10;
+                        showFeedback(drop.x, drop.y, '+10', true);
+                        checkMilestone();
+                    } else {
+                        score = Math.max(0, score - 5);
+                        showFeedback(drop.x, drop.y, '-5', false);
+                        showMessage('💀 Dirty water! -5 points', 'var(--cw-red-penalty)');
+                    }
+                    updateHUD();
+                    removeDrop(i);
+
+                    // Check win
+                    if (score >= GOAL_SCORE) {
+                        winGame();
+                        return;
+                    }
+                    continue;
+                }
+
+                // Missed — went past bottom
+                if (drop.y > areaHeight - groundHeight) {
+                    removeDrop(i);
+                }
+            }
+        }
+
+        function removeDrop(index) {
+            drops[index].element.remove();
+            drops.splice(index, 1);
+        }
+
+        // ===== FEEDBACK POPUPS =====
+        function showFeedback(x, y, text, isGood) {
+            const fb = document.createElement('div');
+            fb.classList.add('feedback', isGood ? 'feedback-good' : 'feedback-bad');
+            fb.textContent = text;
+            fb.style.left = x + 'px';
+            fb.style.top = y + 'px';
+            gameArea.appendChild(fb);
+            setTimeout(() => fb.remove(), 800);
+        }
+
+        // ===== MESSAGE BAR =====
+        let messageTimeout;
+        function showMessage(text, color) {
+            messageBar.textContent = text;
+            messageBar.style.background = color || 'rgba(0,0,0,0.5)';
+            messageBar.classList.add('show');
+            clearTimeout(messageTimeout);
+            messageTimeout = setTimeout(() => {
+                messageBar.classList.remove('show');
+            }, 1500);
+        }
+
+        // ===== MILESTONES =====
+        let lastMilestone = 0;
+        function checkMilestone() {
+            const milestones = [
+                { at: 20, msg: '💧 Great start! Keep going!' },
+                { at: 40, msg: '🌊 Almost halfway there!' },
+                { at: 60, msg: '💪 Over halfway! You got this!' },
+                { at: 80, msg: '🔥 So close! Just 20 more!' },
+                { at: 90, msg: '⚡ Almost there!! 10 to go!' },
+            ];
+            for (const m of milestones) {
+                if (score >= m.at && lastMilestone < m.at) {
+                    lastMilestone = m.at;
+                    showMessage(m.msg, 'rgba(2,136,209,0.8)');
+                }
+            }
+        }
+
+        // ===== UPDATE HUD =====
+        function updateHUD() {
+            scoreDisplay.textContent = score;
+            const pct = Math.min((score / GOAL_SCORE) * 100, 100);
+            progressBar.style.width = pct + '%';
+            progressLabel.textContent = `${score} / ${GOAL_SCORE} drops collected`;
+        }
+
+        // ===== PLAYER MOVEMENT =====
+        function movePlayer() {
+            const areaWidth = gameArea.offsetWidth;
+            const playerWidth = player.offsetWidth;
+
+            if (keysDown['ArrowLeft'] || keysDown['a'] || keysDown['A']) {
+                playerX -= PLAYER_SPEED;
+            }
+            if (keysDown['ArrowRight'] || keysDown['d'] || keysDown['D']) {
+                playerX += PLAYER_SPEED;
+            }
+
+            // Keep in bounds
+            playerX = Math.max(0, Math.min(playerX, areaWidth - playerWidth));
+            player.style.left = playerX + 'px';
+        }
+
+        // Keyboard events
+        document.addEventListener('keydown', (e) => {
+            keysDown[e.key] = true;
+        });
+        document.addEventListener('keyup', (e) => {
+            keysDown[e.key] = false;
+        });
+
+        // Mobile controls
+        function startMobileMove(dir) {
+            mobileDirection = dir;
+            if (mobileInterval) clearInterval(mobileInterval);
+            mobileInterval = setInterval(() => {
+                if (mobileDirection === 'left') {
+                    keysDown['ArrowLeft'] = true;
+                    keysDown['ArrowRight'] = false;
+                } else {
+                    keysDown['ArrowRight'] = true;
+                    keysDown['ArrowLeft'] = false;
+                }
+            }, 16);
+        }
+
+        function stopMobileMove() {
+            mobileDirection = null;
+            if (mobileInterval) clearInterval(mobileInterval);
+            keysDown['ArrowLeft'] = false;
+            keysDown['ArrowRight'] = false;
+        }
+
+        // ===== GAME LOOP =====
+        function gameStep() {
+            if (!gameRunning) return;
+            movePlayer();
+            updateDrops();
+            gameLoop = requestAnimationFrame(gameStep);
+        }
+
+        // ===== TIMER =====
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+
+                if (timeLeft <= 10) {
+                    timerDisplay.classList.add('timer-warning');
+                }
+
+                if (timeLeft <= 0) {
+                    loseGame();
+                }
+            }, 1000);
+        }
+
+        // ===== DROP SPAWNER =====
+        function startDropSpawner() {
+            // Spawn drops more frequently over time
+            const spawn = () => {
+                if (!gameRunning) return;
+                createDrop();
+                const elapsed = GAME_TIME - timeLeft;
+                const interval = Math.max(400, 900 - elapsed * 8);
+                dropInterval = setTimeout(spawn, interval);
+            };
+            spawn();
+        }
+
+        // ===== START GAME =====
+        function startGame() {
+            startScreen.classList.add('hidden');
+            winScreen.classList.add('hidden');
+            loseScreen.classList.add('hidden');
+
+            score = 0;
+            timeLeft = GAME_TIME;
+            lastMilestone = 0;
+            gameRunning = true;
+            drops = [];
+            keysDown = {};
+
+            timerDisplay.classList.remove('timer-warning');
+            updateHUD();
+            timerDisplay.textContent = timeLeft;
+            initPlayer();
+
+            // Clear any existing drops
+            document.querySelectorAll('.drop').forEach(d => d.remove());
+            document.querySelectorAll('.feedback').forEach(f => f.remove());
+            document.querySelectorAll('.confetti-piece').forEach(c => c.remove());
+
+            startTimer();
+            startDropSpawner();
+            gameLoop = requestAnimationFrame(gameStep);
+        }
+
+        // ===== WIN GAME =====
+        function winGame() {
+            gameRunning = false;
+            clearInterval(timerInterval);
+            clearTimeout(dropInterval);
+            cancelAnimationFrame(gameLoop);
+
+            document.getElementById('win-score').textContent = score;
+            winScreen.classList.remove('hidden');
+            launchConfetti();
+        }
+
+        // ===== LOSE GAME =====
+        function loseGame() {
+            gameRunning = false;
+            clearInterval(timerInterval);
+            clearTimeout(dropInterval);
+            cancelAnimationFrame(gameLoop);
+
+            document.getElementById('lose-score').textContent = score;
+            loseScreen.classList.remove('hidden');
+        }
+
+        // ===== RESET GAME =====
+        function resetGame() {
+            gameRunning = false;
+            clearInterval(timerInterval);
+            clearTimeout(dropInterval);
+            cancelAnimationFrame(gameLoop);
+
+            // Clean up
+            document.querySelectorAll('.drop').forEach(d => d.remove());
+            document.querySelectorAll('.feedback').forEach(f => f.remove());
+            document.querySelectorAll('.confetti-piece').forEach(c => c.remove());
+            drops = [];
+
+            startGame();
+        }
+
+        // ===== CONFETTI CELEBRATION =====
+        function launchConfetti() {
+            const colors = ['#F5C916', '#4FC3F7', '#0288D1', '#66BB6A', '#FF7043', '#AB47BC', '#FFFFFF'];
+            const shapes = ['circle', 'square', 'triangle'];
+
+            for (let i = 0; i < 120; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti-piece');
+
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    const size = 6 + Math.random() * 10;
+                    const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                    const x = Math.random() * window.innerWidth;
+                    const rotation = Math.random() * 360;
+
+                    confetti.style.left = x + 'px';
+                    confetti.style.top = '-20px';
+                    confetti.style.width = size + 'px';
+                    confetti.style.height = size + 'px';
+
+                    if (shape === 'circle') {
+                        confetti.style.borderRadius = '50%';
+                        confetti.style.background = color;
+                    } else if (shape === 'square') {
+                        confetti.style.background = color;
+                        confetti.style.transform = `rotate(${rotation}deg)`;
+                    } else {
+                        confetti.style.width = '0';
+                        confetti.style.height = '0';
+                        confetti.style.borderLeft = `${size/2}px solid transparent`;
+                        confetti.style.borderRight = `${size/2}px solid transparent`;
+                        confetti.style.borderBottom = `${size}px solid ${color}`;
+                        confetti.style.background = 'transparent';
+                    }
+
+                    gameArea.appendChild(confetti);
+
+                    // Animate falling
+                    const fallDuration = 2000 + Math.random() * 2000;
+                    const swayAmount = (Math.random() - 0.5) * 200;
+                    const endY = window.innerHeight + 50;
+
+                    confetti.animate([
+                        { transform: `translateY(0) translateX(0) rotate(0deg)`, opacity: 1 },
+                        { transform: `translateY(${endY}px) translateX(${swayAmount}px) rotate(${360 + rotation}deg)`, opacity: 0.5 }
+                    ], {
+                        duration: fallDuration,
+                        easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                    }).onfinish = () => confetti.remove();
+
+                }, i * 20);
+            }
+        }
+
+        // ===== WINDOW RESIZE =====
+        window.addEventListener('resize', () => {
+            if (gameRunning) {
+                const areaWidth = gameArea.offsetWidth;
+                playerX = Math.min(playerX, areaWidth - player.offsetWidth);
+                player.style.left = playerX + 'px';
+            }
+        });
+
+        // ===== INIT =====
+        initPlayer();
+    </script>
+</body>
+</html>
